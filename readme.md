@@ -37,8 +37,8 @@ React Native app built with Expo and Supabase, allowing employees at Blodroed Co
 
 | Status | Krav | Poeng |
 |--------|------|-------|
-| ❌ | **ER-Diagram** – Databasestruktur ikke visualisert | 5% |
-| ❌ | **Sekvensdiagram** – Interaksjon mellom app og database ikke visualisert | 5% |
+| ❌ | **ER-Diagram** – Databasestruktur   | 5% |
+| ❌ | **Sekvensdiagram** – Interaksjon mellom app og database | 5% |
 
 ---
 
@@ -48,25 +48,8 @@ React Native app built with Expo and Supabase, allowing employees at Blodroed Co
 
 ---
 
-## Tech Stack
 
-- [Expo](https://expo.dev) + [Expo Router](https://expo.github.io/router/)
-- [Supabase](https://supabase.com) – Auth + PostgreSQL database
-- [Zustand](https://zustand-demo.pmnd.rs/) – State management
-- [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/) – Encrypted credential storage
-
----
-
-## Kom i gang
-
-1. Legg til miljøvariabler i en `.env` fil:
-
-```
-EXPO_PUBLIC_SUPABASE_URL=din_supabase_url
-EXPO_PUBLIC_SUPABASE_KEY=din_supabase_anon_key
-```
-
-2. Installer avhengigheter:
+1. Installer deps:
 
 ```bash
 bun install
