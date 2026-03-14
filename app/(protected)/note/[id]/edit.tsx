@@ -8,10 +8,7 @@ export default function EditNote() {
     <View>
       <Text>Rediger notis {id}</Text>
 
-      <Button
-        title="Lagre"
-        onPress={() => router.back()}
-      />
+      <Button title="Lagre" onPress={() => router.back()} />
     </View>
   );
 }

@@ -1,5 +1,14 @@
-import { Button, Pressable, ScrollView, View, Text, Alert } from "react-native";
-import { useCallback } from "react";
+import {
+  Button,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+  Text,
+  Alert,
+  Image,
+} from "react-native";
+import { useCallback, useState } from "react";
 
 import {
   SafeAreaView,
@@ -11,18 +20,10 @@ import { router, useFocusEffect } from "expo-router";
 import "react-native-get-random-values";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useNotesStore } from "@/context/notes-store";
-import { v4 as uuidv4 } from "uuid";
 
 export function NotePreview() {
   const notes = useNotesStore((state) => state.notes);
-  const fetchNotes = useNotesStore((state) => state.fetchNotes);
   const deleteNote = useNotesStore((state) => state.deleteNote);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchNotes();
-    }, []),
-  );
 
   return (
     <View
@@ -57,47 +58,95 @@ export function NotePreview() {
               })
             }
           >
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <Text style={{ fontWeight: "600", fontSize: 18, color: "#1C1C1E", flex: 1, marginRight: 8 }}>
-                {note.title}
-              </Text>
-              <Pressable
-                hitSlop={8}
-                onPress={() =>
-                  Alert.alert(
-                    "Delete note",
-                    "Are you sure you want to delete this note?",
-                    [
-                      { text: "Cancel", style: "cancel" },
-                      {
-                        text: "Delete",
-                        style: "destructive",
-                        onPress: async () => {
-                          await deleteNote(note.id);
-                          Alert.alert("Deleted", "Note deleted successfully.");
-                        },
-                      },
-                    ],
-                  )
-                }
-                style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-              >
-                <Text style={{ fontSize: 18, color: "#8E8E93", lineHeight: 22 }}>✕</Text>
-              </Pressable>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 12,
+                width: "100%",
+                alignItems: "flex-start",
+              }}
+            >
+              {note.imageUri ? (
+                <Image
+                  source={{ uri: note.imageUri }}
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 12,
+                    backgroundColor: "#E5E7EB",
+                  }}
+                  resizeMode="cover"
+                />
+              ) : null}
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 18,
+                      color: "#1C1C1E",
+                      flex: 1,
+                      marginRight: 8,
+                    }}
+                  >
+                    {note.title}
+                  </Text>
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() =>
+                      Alert.alert(
+                        "Delete note",
+                        "Are you sure you want to delete this note?",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Delete",
+                            style: "destructive",
+                            onPress: async () => {
+                              await deleteNote(note.id);
+                              Alert.alert(
+                                "Deleted",
+                                "Note deleted successfully.",
+                              );
+                            },
+                          },
+                        ],
+                      )
+                    }
+                    style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+                  >
+                    <Text
+                      style={{ fontSize: 18, color: "#8E8E93", lineHeight: 22 }}
+                    >
+                      ✕
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={{ fontSize: 13, color: "#8E8E93" }}
+                >
+                  {note.description}
+                </Text>
+                <Text style={{ fontSize: 11, color: "#C7C7CC", marginTop: 6 }}>
+                  {note.last_changed
+                    ? new Date(note.last_changed).toLocaleString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
+                </Text>
+              </View>
             </View>
-            <Text numberOfLines={1} style={{ fontSize: 13, color: "#8E8E93" }}>
-              {note.description}
-            </Text>
-            <Text style={{ fontSize: 11, color: "#C7C7CC", marginTop: 6 }}>
-              {note.last_changed
-                ? new Date(note.last_changed).toLocaleString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "—"}
-            </Text>
           </Pressable>
         );
       })}
@@ -107,7 +156,24 @@ export function NotePreview() {
 
 export default function Page() {
   const { signOut } = useSupabase();
-  const insets = useSafeAreaInsets();
+  const fetchNotes = useNotesStore((state) => state.fetchNotes);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  useSafeAreaInsets();
+
+  useFocusEffect(
+    useCallback(() => {
+      void fetchNotes();
+    }, [fetchNotes]),
+  );
+
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchNotes();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [fetchNotes]);
 
   const handleSignOut = async () => {
     try {
@@ -131,21 +197,21 @@ export default function Page() {
         Jobb Notater
       </Text>
 
-      <ScrollView>
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={{ paddingBottom: 12 }}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      >
         <NotePreview />
       </ScrollView>
       <View style={{ width: "100%", marginTop: 8 }}>
         <Pressable
           onPress={() => {
-            const newNote = {
-              id: uuidv4(),
-              title: "New Note",
-              description: "",
-            };
-            useNotesStore.getState().createNote(newNote);
             router.push({
               pathname: "/note/[id]",
-              params: { id: newNote.id },
+              params: { id: "new" },
             });
           }}
           style={({ pressed }) => ({

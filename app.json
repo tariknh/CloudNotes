@@ -14,7 +14,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cloudnotes"
+      "bundleIdentifier": "com.cloudnotes",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +27,11 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.cloudnotes"
+      "package": "com.cloudnotes",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -34,11 +43,31 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "147e2f38-6ab1-4fef-a6d5-2e6e8306a695"
+      }
+    },
+    "owner": "tinarc"
   }
 }

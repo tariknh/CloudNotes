@@ -60,3 +60,7 @@ bun install
 ```bash
 bun run ios
 ```
+
+## Supabase image setup
+
+If you want note images to sync across devices, run the SQL in [supabase/note-images.sql](supabase/note-images.sql) in the Supabase SQL editor first.
