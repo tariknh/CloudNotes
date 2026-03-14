@@ -1,52 +1,40 @@
-# IKT205 – Assignment 2: Blodroed Consulting Notes App
+# IKT205 – Assignment 3: Blodroed Consulting Notes App - Native Functions
 
-React Native app built with Expo and Supabase, allowing employees at Blodroed Consulting to create, view, edit and delete shared notes.
+# Oppgavekrav
 
----
+## Kamera-integrasjon
+- Permissions – 5% ✅
+- Capture & Pick – 10% ✅
+- Preview – 5% ✅
 
-## Krav
+**Sum:** 20%
 
-### Autentisering
+## Storage & Validering
+- Client-side Validation – 10% ✅
+- Supabase Upload – 10% ✅
+- DB Linking – 5% ✅
 
-| Status | Krav | Poeng |
-|--------|------|-------|
-| ✅ | **Sign-up** – Bruker kan opprette konto med e-post/passord | 10% |
-| ✅ | **Email template** – Template i Supabase er endret for sign-up | 10% |
-| ✅ | **Login/Logout** – Brukeren må logge inn før tilgang til appen | 10% |
-| ✅ | **Credentials** – Innlogget bruker forblir innlogget; credentials kryptert med `expo-secure-store` | 5% |
+**Sum:** 25%
 
-### Database
+## UI/UX
+- Loading States – 10% ✅
+- Aspect Ratio Handling – 10% ✅
+- Error Messaging – 10% ✅
 
-| Status | Krav | Poeng |
-|--------|------|-------|
-| ✅ | **Auth-kobling** – RLS aktivert i Supabase; kun innloggede brukere kan gjøre operasjoner | 5% |
-| ✅ | **Create** – Nytt notat lagres med tittel, tekst, bruker-ID og sist endret tidspunkt | 10% |
-| ✅ | **Read** – Notater fra alle brukere vises på skjermen "Jobb Notater" | 10% |
-| ✅ | **Update** – Brukere kan oppdatere et notat med debounced auto-save | 10% |
-| ✅ | **Delete** – Brukere kan slette et notat med bekreftelsesdialog | 10% |
+**Sum:** 30%
 
-### Validering
+## Notifikasjoner
+- System Permissions – 5% ✅
+- Trigger Logic – 15% ✅
+- Content Injection – 5% ✅
 
-| Status | Krav | Poeng |
-|--------|------|-------|
-| ✅ | **Ingen tomme felter i notater** – Tittel og beskrivelse valideres før lagring | 5% |
-| ✅ | **Ingen tomme felter i brukernavn og passord** – Knapper deaktivert ved tomme felt | 5% |
-| ✅ | **Success** – Brukere får bekreftelse etter lagring og sletting | 5% |
-
-### Visualisering
-
-| Status | Krav | Poeng |
-|--------|------|-------|
-| ❌ | **ER-Diagram** – Databasestruktur   | 5% |
-| ❌ | **Sekvensdiagram** – Interaksjon mellom app og database | 5% |
+**Sum:** 25%
 
 ---
 
-## Totalpoeng
+# Total score
 
-**90 / 100%**
-
----
+**100% ✅**
 
 
 1. Installer deps:
@@ -61,6 +49,3 @@ bun install
 bun run ios
 ```
 
-## Supabase image setup
-
-If you want note images to sync across devices, run the SQL in [supabase/note-images.sql](supabase/note-images.sql) in the Supabase SQL editor first.
