@@ -21,16 +21,16 @@
 
 ## 3. Build & Dokumentasjon (25%)
 
-- App Fil (.apk) – 10% ❌
+- App Fil (.apk) – 10% ✅
 - Build-dokumentasjon (README) – 15% ✅
 
-**Sum:** 25% (15% levert)
+**Sum:** 25%
 
 ---
 
 # Total score
 
-**90% ✅** *(10% ikke levert da jeg mangler .apk fil)*
+**100% ✅** 
 
 ---
 
