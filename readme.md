@@ -1,4 +1,4 @@
-# IKT205 – Assignment 3: Blodroed Consulting Notes App - Native Functions
+# IKT205 – Assignment 4: Blodroed Consulting Notes App - Deployment
 
 # Oppgavekrav
 
