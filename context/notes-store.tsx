@@ -21,7 +21,10 @@ export type Note = {
 
 type NotesState = {
   notes: Note[];
+  hasMoreNotes: boolean;
+  isLoadingMoreNotes: boolean;
   fetchNotes: () => Promise<void>;
+  loadMoreNotes: () => Promise<void>;
   createNote: (note: Note) => Promise<Note>;
   getNoteById: (id: string) => Note | undefined;
   updateNote: (id: string, updates: NoteUpdates) => void;
@@ -31,10 +34,14 @@ type NotesState = {
 
 export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
+  hasMoreNotes: true,
+  isLoadingMoreNotes: false,
   fetchNotes: async () => {
+    const pageSize = 5;
     const { data, error } = await supabase
       .from("notes")
       .select("*")
+      .range(0, pageSize - 1)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -47,7 +54,43 @@ export const useNotesStore = create<NotesState>((set, get) => ({
         ...note,
         imageUri: getNoteImagePublicUrl(note.image_path, note.last_changed),
       })),
+      hasMoreNotes: (data?.length ?? 0) === pageSize,
     });
+  },
+
+  loadMoreNotes: async () => {
+    const { notes, isLoadingMoreNotes, hasMoreNotes } = get();
+    if (isLoadingMoreNotes || !hasMoreNotes) {
+      return;
+    }
+
+    set({ isLoadingMoreNotes: true });
+    const pageSize = 5;
+    const start = notes.length;
+    const end = start + pageSize - 1;
+
+    const { data, error } = await supabase
+      .from("notes")
+      .select("*")
+      .range(start, end)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Failed to load more notes:", error.message);
+      set({ isLoadingMoreNotes: false });
+      return;
+    }
+
+    const mappedNotes = (data ?? []).map((note) => ({
+      ...note,
+      imageUri: getNoteImagePublicUrl(note.image_path, note.last_changed),
+    }));
+
+    set((state) => ({
+      notes: [...state.notes, ...mappedNotes],
+      hasMoreNotes: mappedNotes.length === pageSize,
+      isLoadingMoreNotes: false,
+    }));
   },
 
   createNote: async (note: Note) => {

@@ -157,6 +157,9 @@ export function NotePreview() {
 export default function Page() {
   const { signOut } = useSupabase();
   const fetchNotes = useNotesStore((state) => state.fetchNotes);
+  const loadMoreNotes = useNotesStore((state) => state.loadMoreNotes);
+  const hasMoreNotes = useNotesStore((state) => state.hasMoreNotes);
+  const isLoadingMoreNotes = useNotesStore((state) => state.isLoadingMoreNotes);
   const [isRefreshing, setIsRefreshing] = useState(false);
   useSafeAreaInsets();
 
@@ -205,6 +208,30 @@ export default function Page() {
         }
       >
         <NotePreview />
+        {hasMoreNotes ? (
+          <Pressable
+            onPress={() => {
+              void loadMoreNotes();
+            }}
+            disabled={isLoadingMoreNotes}
+            style={({ pressed }) => ({
+              marginTop: 12,
+              width: "100%",
+              backgroundColor: "#ffffff",
+              paddingVertical: 12,
+              borderRadius: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              borderColor: "#d0d7de",
+              borderWidth: 1,
+              opacity: isLoadingMoreNotes ? 0.5 : pressed ? 0.8 : 1,
+            })}
+          >
+            <Text style={{ color: "#0f172a", fontSize: 14, fontWeight: "600" }}>
+              {isLoadingMoreNotes ? "Laster..." : "Last mer"}
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
       <View style={{ width: "100%", marginTop: 8 }}>
         <Pressable

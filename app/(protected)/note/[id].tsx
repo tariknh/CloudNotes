@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as ImagePicker from "expo-image-picker";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import type { CameraType } from "expo-camera";
+import { useIsFocused } from "@react-navigation/native";
 import { useNotesStore } from "@/context/notes-store";
 import {
   getNoteImagePublicUrl,
@@ -29,11 +30,13 @@ import {
 function CameraSection({
   disabled,
   hasImage,
+  isFocused,
   onCapture,
   onPickFromLibrary,
 }: {
   disabled: boolean;
   hasImage: boolean;
+  isFocused: boolean;
   onCapture: (uri: string) => Promise<void>;
   onPickFromLibrary: () => Promise<void>;
 }) {
@@ -120,7 +123,15 @@ function CameraSection({
     <View style={styles.mediaCard}>
       <Text style={styles.sectionTitle}>Add photo</Text>
       <View style={styles.cameraSection}>
-        <CameraView ref={cameraRef} style={styles.camera} facing={facing} />
+        {isFocused ? (
+          <CameraView ref={cameraRef} style={styles.camera} facing={facing} />
+        ) : (
+          <View style={styles.cameraInactiveState}>
+            <Text style={styles.message}>
+              Camera paused while screen is not active.
+            </Text>
+          </View>
+        )}
       </View>
       <View style={styles.cameraActionsRow}>
         <TouchableOpacity
@@ -157,19 +168,45 @@ function CameraSection({
 
 export default function NoteDetailed() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+  const isFocused = useIsFocused();
   const noteId = Array.isArray(id) ? id[0] : id;
   const isNewNote = noteId === "new";
   const updateNote = useNotesStore((state) => state.updateNote);
   const createNote = useNotesStore((state) => state.createNote);
+  const fetchNotes = useNotesStore((state) => state.fetchNotes);
   const saveNote = useNotesStore((state) => state.saveNote);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSavingImage, setIsSavingImage] = useState(false);
+  const [isLoadingNote, setIsLoadingNote] = useState(false);
   const [stagedImageUri, setStagedImageUri] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
   const note = useNotesStore((state) =>
     noteId ? state.notes.find((item) => item.id === noteId) : undefined,
   );
+
+  useEffect(() => {
+    if (!noteId || isNewNote || note) {
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingNote(true);
+
+    fetchNotes()
+      .catch((error) => {
+        console.error("Failed to fetch note:", error);
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingNote(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [noteId, isNewNote, note, fetchNotes]);
 
   const saveImageState = async (nextImagePath?: string) => {
     if (!note) {
@@ -351,10 +388,7 @@ export default function NoteDetailed() {
       }
 
       Alert.alert("Saved", "Note created successfully.");
-      router.replace({
-        pathname: "/note/[id]",
-        params: { id: newId },
-      });
+      router.back();
       return;
     }
 
@@ -398,7 +432,16 @@ export default function NoteDetailed() {
   }
 
   if (!note && !isNewNote) {
-    if (__DEV__) {
+    if (isLoadingNote) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" testID="note-loader" />
+          <Text>Loading note...</Text>
+        </View>
+      );
+    }
+
+    if (!__DEV__) {
       console.warn("[note] Note not found", { noteId });
     }
     return (
@@ -500,6 +543,7 @@ export default function NoteDetailed() {
           <CameraSection
             disabled={isSavingImage}
             hasImage={!isNewNote && Boolean(note?.imageUri)}
+            isFocused={isFocused}
             onCapture={handleStageImage}
             onPickFromLibrary={handlePickFromLibrary}
           />
@@ -574,6 +618,13 @@ export default function NoteDetailed() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    padding: 16,
+  },
   screen: {
     padding: 16,
     gap: 12,
@@ -619,6 +670,13 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  cameraInactiveState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e5e7eb",
+    paddingHorizontal: 16,
   },
   cameraActionsRow: {
     flexDirection: "row",
